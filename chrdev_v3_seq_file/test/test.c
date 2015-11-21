@@ -2,7 +2,7 @@
 #include <unistd.h> // for exit()
 #include <sys/ioctl.h> //ioctl
 #include <stdio.h>
-static char *dev="/dev/hello", message[100];
+static char *dev="./hello", message[100];
 
 void main()
 {

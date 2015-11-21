@@ -1,4 +1,6 @@
-obj-m += chardev.o
+TARGET_NAME=chardev
+
+obj-m += $(TARGET_NAME).o
 
 # Debug Message Switcher
 DEBUG = y
@@ -21,7 +23,8 @@ clean:
 	#rm -rf *.o *.ko *.mod.* *.symvers *.order .*.cmd
 
 install:
-	cp -a *.ko /lib/modules/3.8.0-42-generic/kernel/drivers/char
+	cp -a $(TARGET_NAME).ko /lib/modules/$(shell uname -r)/kernel/drivers/char
 	depmod -ae
 uninstall:
+	rm -rf /lib/modules/$(shell uname -r)/kernel/drivers/char/$(TARGET_NAME).ko
 	depmod -ae

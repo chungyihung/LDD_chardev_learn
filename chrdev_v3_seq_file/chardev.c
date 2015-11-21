@@ -23,6 +23,8 @@ static struct cdev mycdev;
 struct proc_dir_entry *Proc_File_98;
 
 static int major = 230;
+static bool write_buff_flag = false;
+static int counter = 0;
 
 /* Using seq_file interface */
 
@@ -97,51 +99,44 @@ ssize_t dev_read (struct file *fs, char __user *buffer, size_t size, loff_t *off
 {
 
     printk("<1>dev_read\n");
-    //+++
     int byte_read = 0;
     if (*msg_ptr == 0) return 0;
+
     while(size && *msg_ptr) {
         put_user(*(msg_ptr++), buffer++);
         size--;
         byte_read++;
     }
-    put_user(*(msg_ptr++), buffer++);
-    byte_read++;
-    //---
     return byte_read;
 }
 
 //Executed when process attempted to write to a device
 ssize_t dev_write(struct file *fs, char __user *buffer, size_t size, loff_t *lo)
 {
-    printk("<1>dev_write\n");
-
-    //+++
-
+    printk("<1>dev_write: size =%d\n", size);
+    write_buff_flag = true;
     int i;
     for (i = 0; i < size && i < BUF_LEN; i++) {
         get_user(Message[i], buffer + i);
     }
     msg_ptr = Message;
+    *(msg_ptr + i) = NULL;
+    printk("kernel space: userspace write [%s] to kernel space\n", msg_ptr);
     return i;
-
-    //---
-
-    return 0;
 }
 
 //Executed at every open time
 int dev_open(struct inode *inode, struct file *fs)
 {
     printk("<1>dev_open\n");
-
-    //Here is the main open function
     //+++
-    static int counter = 0;
-    sprintf(Message, "I already told you %d times Hello World", counter++);
-    msg_ptr = Message;
+    if (!write_buff_flag){
+       sprintf(Message, "Open %d times\n", counter++);
+       msg_ptr = Message;
+    } else {
+       write_buff_flag = false;
+    }
     //---
-
     return 0;
 }
 
